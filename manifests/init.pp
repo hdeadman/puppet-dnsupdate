@@ -13,7 +13,8 @@
 #
 # Sample Usage: include ::dnsupdate
 #
-class dnsupdate {
+class dnsupdate ($ipaddr     = $::ipaddress,
+                 $dnsname    = $::fqdn) {
   # Package
   package { 'bind-utils': ensure => 'installed', }
 
