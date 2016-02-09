@@ -15,11 +15,15 @@
 #
 class dnsupdate ($ipaddr             = $::ipaddress,
                  $dnsname            = $::fqdn,
-                 $manage_bind_utils  = true) {
+                 $manage_bind_utils  = true,
+                 $bind_utils_package = 'bind-utils') {
   
   if $manage_bind_utils { 
     # Package
-    ensure_packages ('bind-utils', {ensure => 'installed'})
+    package {'bind-tools': 
+      ensure => present,
+      name   => $bind_utils_package
+    }
   }
   
   # Update
@@ -32,6 +36,6 @@ class dnsupdate ($ipaddr             = $::ipaddress,
     command  => 'nsupdate /etc/nsupdate',
     provider => 'shell',
     unless   => "grep $(nslookup $(hostname -f) |sed -n '/^Name/{n;s/.*: //p}') /etc/nsupdate && grep $(nslookup $(hostname -i)|egrep -o '^[0-9]+.[0-9]+.[0-9]+.[0-9]+') /etc/nsupdate",
-    require  => Package['bind-utils'],
+    require  => Package['bind-tools'],
   }
 }
