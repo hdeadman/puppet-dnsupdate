@@ -13,11 +13,15 @@
 #
 # Sample Usage: include ::dnsupdate
 #
-class dnsupdate ($ipaddr     = $::ipaddress,
-                 $dnsname    = $::fqdn) {
-  # Package
-  package { 'bind-utils': ensure => 'installed', }
-
+class dnsupdate ($ipaddr             = $::ipaddress,
+                 $dnsname            = $::fqdn,
+                 $manage_bind_utils  = true) {
+  
+  if $manage_bind_utils { 
+    # Package
+    ensure_packages ('bind-utils', {ensure => 'installed'})
+  }
+  
   # Update
   file { '/etc/nsupdate':
     ensure  => 'present',
