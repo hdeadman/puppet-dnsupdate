@@ -16,7 +16,8 @@
 class dnsupdate ($ipaddr             = $::ipaddress,
                  $dnsname            = $::fqdn,
                  $manage_bind_utils  = true,
-                 $bind_utils_package = 'bind-utils') {
+                 $bind_utils_package = 'bind-utils',
+                 $debug              = true) {
   
   if $manage_bind_utils { 
     # Package
@@ -26,14 +27,34 @@ class dnsupdate ($ipaddr             = $::ipaddress,
     }
   }
   
-  # Update
+  # -d for $debug gives you less debug than -D
+	case $debug {
+	  true : {
+	    $debug_option = '-D'
+	  }
+	  false : {
+	    $debug_option = ''
+	  }
+	  default : {
+	    $debug_option = $debug
+	  }
+	}
+  
+  # Update, dump input for debugging purposes if we are going to run the update, in case it fails
   file { '/etc/nsupdate':
     ensure  => 'present',
     content => template('dnsupdate/nsupdate.erb')
   } ->
+  exec { 'cat nsupdate':
+    path     => ['/bin', '/usr/bin'],
+    command  => 'cat /etc/nsupdate',
+    provider => 'shell',
+    logoutput=> true,
+    unless   => "grep $(nslookup $(hostname -f) |sed -n '/^Name/{n;s/.*: //p}') /etc/nsupdate && grep $(nslookup $(hostname -i)|egrep -o '^[0-9]+.[0-9]+.[0-9]+.[0-9]+') /etc/nsupdate",
+  } ->   
   exec { 'nsupdate':
     path     => ['/bin', '/usr/bin'],
-    command  => 'nsupdate /etc/nsupdate',
+    command  => "nsupdate $debug_option /etc/nsupdate",
     provider => 'shell',
     unless   => "grep $(nslookup $(hostname -f) |sed -n '/^Name/{n;s/.*: //p}') /etc/nsupdate && grep $(nslookup $(hostname -i)|egrep -o '^[0-9]+.[0-9]+.[0-9]+.[0-9]+') /etc/nsupdate",
     require  => Package['bind-tools'],
