@@ -27,10 +27,10 @@ class dnsupdate ($ipaddr             = $::ipaddress,
     }
   }
   
-  # -d for $debug gives you less debug than -D
+  # -D for $debug gives you more debug than -d
 	case $debug {
 	  true : {
-	    $debug_option = '-D'
+	    $debug_option = '-d'
 	  }
 	  false : {
 	    $debug_option = ''
