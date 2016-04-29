@@ -8,6 +8,9 @@
 # It makes sure bind-utils is installed which has the nsupdate binary.
 # It makes a file /etc/nsupdate used for pushing updates and for
 # verifying that updates need to be made by queuring DNS first.
+# 
+# Zones in Active Directory need to allow secure and non-secure updates, 
+# make sure you do this for the forward and reverse zones
 #
 # Requires: stdlib
 #
